@@ -29,7 +29,7 @@ jobs:
         if: github.event_name == 'schedule'
         run: sleep $(shuf -i 10-200 -n 1)
         
-      - name: write config
+      - name: write config  # 使用cat命令将输出重定向到一个名为"config.yaml"的文件。<<- EOF表示开始一个多行输入，直到遇到EOF为止。
         env:
           CONFIG: ${{ secrets.CONFIG }}
         run: |
@@ -47,7 +47,7 @@ jobs:
 #           warp-cli  --accept-tos register 
 #           warp-cli  --accept-tos connect        
           
-      - name: checkin
-        continue-on-error: true
+      - name: checkin  
+        continue-on-error: true  # 设置该步骤在出现错误时仍然继续运行工作流程，而不会导致整个工作流程中断。
         run: |
           python miuitask.py
