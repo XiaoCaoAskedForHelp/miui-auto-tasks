@@ -1,0 +1,53 @@
+name: signin
+
+on:
+  schedule:
+    - cron: "0 21 * * *"
+  workflow_dispatch:
+  
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout data
+        uses: actions/checkout@v3
+
+      - name: Setup timezone
+        uses: zcong1993/setup-timezone@master
+        with:
+          timezone: Asia/Shanghai
+    
+      - name: Set up Python #安装python
+        uses: actions/setup-python@v3
+        with:
+          python-version: 3.10.8
+
+      - name: Install requirements #安装依赖
+        run: pip install -r requirements.txt
+          
+      - name: Random sleep
+        if: github.event_name == 'schedule'
+        run: sleep $(shuf -i 10-200 -n 1)
+        
+      - name: write config
+        env:
+          CONFIG: ${{ secrets.CONFIG }}
+        run: |
+          cat > config.yaml <<- EOF  
+          ${{ secrets.CONFIG }} 
+          EOF
+          cat config.yaml
+   
+#       - name: install wgcf
+#         run: |
+#           curl https://pkg.cloudflareclient.com/pubkey.gpg | sudo gpg --yes --dearmor --output /usr/share/keyrings/cloudflare-warp-archive-keyring.gpg
+#           echo 'deb [arch=amd64 signed-by=/usr/share/keyrings/cloudflare-warp-archive-keyring.gpg] https://pkg.cloudflareclient.com/ focal main' | sudo tee /etc/apt/sources.list.d/cloudflare-client.list
+#           sudo apt update
+#           sudo apt install cloudflare-warp -y
+#           warp-cli  --accept-tos register 
+#           warp-cli  --accept-tos connect        
+          
+      - name: checkin
+        continue-on-error: true
+        run: |
+          python miuitask.py
